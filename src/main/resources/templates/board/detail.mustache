@@ -25,6 +25,16 @@
         </div>
     </div>
 
+    <!-- 좋아요 -->
+    <div>
+        {{#love.isLove}}
+            <i class="fas fa-heart text-danger" ></i><span>{{love.loveCount}}</span>
+        {{/love.isLove}}
+        {{^love.isLove}}
+            <i class="far fa-heart"></i><span>{{love.loveCount}}</span>
+        {{/love.isLove}}
+
+    </div>
     <!-- 댓글 -->
     <div class="card mt-3">
         <!-- 댓글등록 -->

@@ -7,8 +7,12 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import shop.mtcoding.blog._core.ApiUtil;
 import shop.mtcoding.blog._core.util.Script;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor // final이 붙은 애들에 대한 생성자를 만들어줌
@@ -22,6 +26,17 @@ public class UserController {
     // 왜 조회인데 post임? 민간함 정보는 body로 보낸다.
     // 로그인만 예외로 select인데 post 사용
     // select * from user_tb where username=? and password=?
+
+    @GetMapping("/api/username-same-check")
+    public @ResponseBody ApiUtil<?> usernameSameCheck(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return new ApiUtil<>(true); // 유저네임세임체크했니? 응! 가입해. 
+        } else {
+            return new ApiUtil<>(false); // 유저네임세임체크했니? 아니! 유저네임 다른 거 적어.
+        }
+    }
+
     @PostMapping("/login")
     public String login(UserRequest.LoginDTO requestDTO) {
 
@@ -41,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public String join(UserRequest.JoinDTO requestDTO) { // @컨트롤러는 파일을 리턴하는데 @리스폰스바디를 해주면 메시지가 그대로 뜬다.
+    public String join(UserRequest.JoinDTO requestDTO, HttpServletRequest request) { // @컨트롤러는 파일을 리턴하는데 @리스폰스바디를 해주면 메시지가 그대로 뜬다.
         System.out.println(requestDTO);
         String rawPassword = requestDTO.getPassword();
         String encPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt()); // salt를 쳐줘야 rainbow table에 안 털림
@@ -51,6 +66,8 @@ public class UserController {
         } catch (Exception e) {
             throw new RuntimeException("아이디가 중복되었어요.");
         }
+        List<User> userList = userRepository.viewUserList();
+        request.setAttribute("userList", userList);
         return "redirect:/loginForm";
     }
 
@@ -65,8 +82,19 @@ public class UserController {
     }
 
     @GetMapping("/user/updateForm")
-    public String updateForm() {
+    public String updateForm(UserRequest.UpdateDTO requestDTO, HttpServletRequest request) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        String rawPassword = requestDTO.getPassword();
+        String encPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt()); // salt를 쳐줘야 rainbow table에 안 털림
+        requestDTO.setPassword(encPassword);
+        System.out.println(requestDTO);
+        userRepository.updateById(requestDTO);
         return "user/updateForm";
+    }
+
+    @PostMapping("/user/update")
+    public String update() {
+        return "redirect:/";
     }
 
     @GetMapping("/logout")

@@ -1,13 +1,14 @@
 {{> /layout/header}}
 
-<h1>
-    {{#sessionUser}}
-        {{username}}
-    {{/sessionUser}}
-</h1>
+<!--<h1>-->
+<!--    {{#sessionUser}}-->
+<!--        {{username}}-->
+<!--    {{/sessionUser}}-->
+<!--</h1>-->
 
 <div class="container p-5">
     <div class="d-flex justify-content-end">
+<!--        폼태그에 넣으면 엔터를 칠 수 있다. -->
         <form class="d-flex mb-2" action="/" method="get">
             <input class="form-control me-2" type="text" placeholder="Search..." required name="keyword"/>
             <button class="btn btn-primary">검색</button>
